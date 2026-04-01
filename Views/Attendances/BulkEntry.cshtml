@@ -1,0 +1,91 @@
+@model StudentApp.Models.BulkAttendanceEntryViewModel
+
+@{
+    ViewData["Title"] = "Bulk Attendance";
+}
+
+<h1>Bulk Entry Interface (Data Collection)</h1>
+<p class="text-muted">Attendance Log View for fast daily telemetry input.</p>
+
+<form asp-action="BulkEntry" method="get" class="row g-3 mb-4">
+    <div class="col-md-4">
+        <label for="department" class="form-label">Class Selection (Department)</label>
+        <select id="department" name="department" class="form-select" onchange="this.form.submit()">
+            @if (Model.Departments != null && Model.Departments.Any())
+            {
+                foreach (var department in Model.Departments)
+                {
+                    if (department == Model.SelectedDepartment)
+                    {
+                        <option value="@department" selected>@department</option>
+                    }
+                    else
+                    {
+                        <option value="@department">@department</option>
+                    }
+                }
+            }
+            else
+            {
+                <option value="">No departments found</option>
+            }
+        </select>
+    </div>
+</form>
+
+@if (Model.Rows != null && Model.Rows.Any())
+{
+    <form asp-action="BulkEntry" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="SelectedDepartment" />
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Student Asset</th>
+                        <th>Student ID</th>
+                        <th>Department</th>
+                        <th>Attendance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @for (var i = 0; i < Model.Rows.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            @Model.Rows[i].StudentName
+                            <input type="hidden" asp-for="Rows[@i].StudentName" />
+                        </td>
+                        <td>
+                            @Model.Rows[i].StudentId
+                            <input type="hidden" asp-for="Rows[@i].StudentId" />
+                        </td>
+                        <td>
+                            @Model.Rows[i].Department
+                            <input type="hidden" asp-for="Rows[@i].Department" />
+                        </td>
+                        <td>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" asp-for="Rows[@i].Status" value="Present" />
+                                <label class="form-check-label">Present</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" asp-for="Rows[@i].Status" value="Absent" />
+                                <label class="form-check-label">Absent</label>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit Logs &amp; Analyze Risk</button>
+        <a asp-action="Index" class="btn btn-secondary">Back to Attendance Log</a>
+    </form>
+}
+else
+{
+    <div class="alert alert-info">No students found for the selected department.</div>
+}

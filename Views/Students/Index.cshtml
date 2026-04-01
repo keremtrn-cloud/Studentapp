@@ -1,0 +1,75 @@
+@model IEnumerable<StudentApp.Models.Student>
+
+@{
+    ViewData["Title"] = "Students";
+}
+
+<h1>Students</h1>
+
+<p>
+    <a asp-action="Create">Create New Student</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Student ID</th>
+            <th>
+                @Html.DisplayNameFor(model => model.FullName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Department)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GradeLevel)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RiskScore)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.
+ParentEmail
+
+
+
+
+)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @item.Id
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FullName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Department)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.GradeLevel)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RiskScore)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.
+ParentEmail
+
+
+
+
+)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

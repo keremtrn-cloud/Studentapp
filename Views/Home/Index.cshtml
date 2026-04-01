@@ -1,0 +1,143 @@
+@model StudentApp.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Executive Dashboard";
+
+    var deptLabels = Model.DepartmentRisks.Select(d => d.Department).ToList();
+    var deptValues = Model.DepartmentRisks.Select(d => d.TotalRiskPoints).ToList();
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h1 class="display-6 mb-0">Executive Summary</h1>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Student Assets</h6>
+                    <h2 class="mb-0">@Model.TotalStudents</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Critical Risk Alerts</h6>
+                    <h2 class="mb-0 text-danger">@Model.CriticalCount</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Warning Thresholds</h6>
+                    <h2 class="mb-0 text-warning">@Model.WarningCount</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">System Health</h6>
+                    <h2 class="mb-0 text-success">@Model.TodayAttendancePercent.ToString("0.#")% Present</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <strong>Risk Distribution</strong>
+                </div>
+                <div class="card-body">
+                    <canvas id="riskPieChart" height="260"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <strong>Department Analytics</strong>
+                </div>
+                <div class="card-body">
+                    <canvas id="departmentBarChart" height="260"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+            <strong>Recent Critical Incidents</strong>
+        </div>
+        <ul class="list-group list-group-flush">
+            @if (Model.RecentIncidents.Any())
+            {
+                foreach (var incident in Model.RecentIncidents)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <span class="me-2 text-danger">●</span>
+                            Student #@incident.StudentId (@incident.StudentName) - Triggered: @($"{incident.AbsenceCount}th") Absence - Risk: @incident.RiskScore
+                            <div class="small text-muted">@incident.TriggerDate.ToString("dd.MM.yyyy HH:mm")</div>
+                        </div>
+                        <a asp-controller="Students" asp-action="Details" asp-route-id="@incident.StudentId" class="btn btn-sm btn-outline-danger">
+                            Investigate
+                        </a>
+                    </li>
+                }
+            }
+            else
+            {
+                <li class="list-group-item text-muted">No critical incidents found.</li>
+            }
+        </ul>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const riskChartData = {
+            labels: ["Level 0-20 (Low)", "Level 40-60 (Medium)", "Level 80-100 (High/Critical)"],
+            datasets: [{
+                data: [@Model.LowRiskCount, @Model.MediumRiskCount, @Model.HighRiskCount],
+                backgroundColor: ["#198754", "#ffc107", "#dc3545"]
+            }]
+        };
+
+        const deptLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(deptLabels));
+        const deptValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(deptValues));
+
+        new Chart(document.getElementById("riskPieChart"), {
+            type: "pie",
+            data: riskChartData,
+            options: {
+                plugins: {
+                    legend: { position: "bottom" }
+                }
+            }
+        });
+
+        new Chart(document.getElementById("departmentBarChart"), {
+            type: "bar",
+            data: {
+                labels: deptLabels,
+                datasets: [{
+                    label: "Accumulated Risk Points",
+                    data: deptValues,
+                    backgroundColor: "#0d6efd"
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+}

@@ -1,0 +1,62 @@
+@model IEnumerable<StudentApp.Models.Attendance>
+
+@{
+    ViewData["Title"] = "Attendance Log";
+}
+
+<h1>Attendance Log View (Telemetry Feed)</h1>
+<p>
+    <a asp-action="BulkEntry" class="btn btn-outline-primary">Open Bulk Update Grid</a>
+</p>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Timestamp</th>
+                <th>Student Asset</th>
+                <th>Status</th>
+                <th>Risk Impact</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            var isAbsent = item.Status != null && item.Status.Equals("Absent", StringComparison.OrdinalIgnoreCase);
+            <tr>
+                <td>@item.Date.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>
+                    @(item.Student != null
+                        ? $"{item.Student.FullName} (ID: {item.Student.Id})"
+                        : "Unknown Student")
+                </td>
+                <td>
+                    @if (isAbsent)
+                    {
+                        <span class="badge bg-danger">Absent</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Present</span>
+                    }
+                </td>
+                <td>
+                    @if (isAbsent)
+                    {
+                        <span class="text-danger">+20 points</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">0</span>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No attendance records found.</p>
+}
